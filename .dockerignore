@@ -1,0 +1,11 @@
+.git
+.gitignore
+.drop
+.snakemake
+.wBuild
+drop_analysis
+
+Dockerfile*
+docker-compose*
+README.md
+LICENSE
