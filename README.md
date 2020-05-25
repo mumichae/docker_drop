@@ -17,8 +17,13 @@ docker build . --network=host --tag mertes/drop:latest --tag mertes/drop
 ## Using the Docker image
 
 ```
+# currently working
+docker run mertes/drop -c "drop demo; snakemake -n"
+
+# but we should init the docker with
 docker run mertes/drop bash
 
+# run internally the commands with
 mkdir drop_analysis
 cd drop_analysis
 
@@ -34,6 +39,7 @@ snakemake --cores 2
 * how to inject your project folder into the image
 * How to store output outside the image
 * Make sure that reruning the pipeline with docker does not recreate the files (aka time stamps!)
+* Can not get a bash command line to work
 
 ## Using the environemnt locally
 
