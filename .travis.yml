@@ -5,6 +5,10 @@ python:
 services:
     - docker
 
+cache:
+    - directories:
+        - $HOME/miniconda
+
 install:
     - docker build -t drop/drop .
 
