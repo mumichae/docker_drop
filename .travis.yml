@@ -10,7 +10,7 @@ cache:
         - $HOME/miniconda
 
 install:
-    - docker build -t drop/drop .
+    - travis_wait 30 docker build -t drop/drop .
 
     # conda installation
     - sudo apt update
@@ -25,7 +25,7 @@ install:
     - conda info -a
 
     # install env
-    - conda env create -f environment.yml
+    - travis_wait 30 conda env create -f environment.yml
     - conda activate docker-drop
 
 script:
