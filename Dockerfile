@@ -27,14 +27,13 @@ RUN yum clean all
 SHELL ["conda", "run", "-n", "drop-docker", "/bin/bash", "-c"]
 
 # install tMAE
-RUN R -e "BiocManager::install(\"c-mertes/tMAE@patch-1\", ask=FALSE, update=FALSE, dependencies=FALSE)"
+RUN R -e "BiocManager::install(\"mumichae/tMAE\", ask=FALSE, update=FALSE, dependencies=FALSE)"
 
 RUN conda init
 RUN echo "conda activate drop-docker" >> ~/.bashrc
 
-# entry point
+# entry point to enable conda env on the fly
 SHELL [ "bash", "-c" ]
 COPY entry_point.sh /usr/local/bin/
-## ENTRYPOINT ["conda", "run", "-n", "drop-docker", "bash", "-i"]
 ENTRYPOINT [ "entry_point.sh"  ]
 CMD bash

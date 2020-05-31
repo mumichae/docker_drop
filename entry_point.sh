@@ -13,9 +13,6 @@ elif [ "${1#./}" == "bash" ]; then
      echo "run with no prefix: '$@'"
      exec "$@"
 else
-    if [ "$1" == "snakemake" ]; then
-        
-    fi
     echo "run with conda prefix: '$@'"
     conda run -n drop-docker $@
 fi

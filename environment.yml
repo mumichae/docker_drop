@@ -25,6 +25,7 @@ dependencies:
     - samtools>=1.7
     - bcftools
     - gatk4>=4.0.4
+    - star>=2.7
 
     # R dependencies
     - r-base>=4.0.0
@@ -47,7 +48,7 @@ dependencies:
     - bioconductor-variantannotation
     - bioconductor-bsgenome.hsapiens.ucsc.hg19
     - bioconductor-mafdb.gnomad.r2.1.hs37d5
-    - bioconductor-mafdb.gnomad.r3.0.grch38
+    - bioconductor-mafdb.gnomad.r2.1.grch38
     #mumichae/tMAE TRUE
 
     - pip:
