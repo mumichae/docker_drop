@@ -47,6 +47,8 @@ RUN export CC=x86_64-conda_cos6-linux-gnu-gcc \
         && make -j 4 \
         && make install
 
+# problem with wbuild/drop?
+RUN sed -re 's/(self.path=os.path.abspath.self.path)/\1[0]/' -i /usr/local/envs/drop-docker/lib/python3.7/site-packages/wbuild/utils.py
 
 WORKDIR /drop
 COPY entry_point.sh /usr/local/bin/entry_point.sh
