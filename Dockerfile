@@ -30,6 +30,24 @@ RUN sed 's/tar -zx/tar --no-same-owner -zx/' -i /usr/local/envs/drop-docker/lib/
     && echo -e "\n# activate drop environemnt\nconda activate drop-docker\n" >> ~/.bashrc \
     && echo -e "\n# read/write for group\numask 002\n" >> ~/.bashrc
 
+# install bcftools
+RUN yum install -y autoconf git vim
+SHELL ["conda", "run", "-n", "drop-docker", "/bin/bash", "-c"]
+RUN export CC=x86_64-conda_cos6-linux-gnu-gcc \
+    && git clone git://github.com/samtools/bcftools.git \
+    && git clone git://github.com/samtools/htslib.git \
+    && cd htslib \
+        && autoheader \
+        && autoconf \
+        && ./configure --prefix=/usr/local/envs/drop-docker/ \
+    && cd ../bcftools \
+        && autoheader \
+        && autoconf \
+        && ./configure --prefix=/usr/local/envs/drop-docker/ \
+        && make -j 4 \
+        && make install
+
+
 WORKDIR /drop
 COPY entry_point.sh /usr/local/bin/entry_point.sh
 ENTRYPOINT [ "entry_point.sh" ]
