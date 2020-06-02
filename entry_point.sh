@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-echo "$@"
+# start script
+echo "my input: '$@'"
 
-# first arg is `-f` or `--some-option`
-# or there are no args
-if [ "$#" -eq 0 ] || [ "${1#-}" != "$1" ]; then
-    # docker run bash -c 'echo hi'
-    echo "run with bash prefix: '$@'"
+# some bash args or non at all (default)
+if [ "$#" -eq 0 ] || [ "${1#-}" != "$1" ] ;
+then
+    echo "run as bash with just parameters ..."
     exec bash "$@"
 elif [ "${1#./}" == "bash" ]; then
-     echo "run with no prefix: '$@'"
-     exec "$@"
+    echo "bash command is provided ..."
+    exec "$@"
 else
-    echo "run with conda prefix: '$@'"
-    conda run -n drop-docker $@
+    echo "run it using conda env ..."
+    conda run -n drop-docker "$@"
 fi
 
-echo "bye bye ..."
+

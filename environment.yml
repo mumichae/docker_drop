@@ -23,7 +23,7 @@ dependencies:
     # command line tools
     - tabix
     - samtools>=1.7
-    - bcftools
+    - bcftools>=1.9
     - gatk4>=4.0.4
     - star>=2.7
 
