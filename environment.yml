@@ -1,4 +1,4 @@
-name: drop-docker
+name: drop
 
 channels:
   - bioconda
@@ -23,7 +23,7 @@ dependencies:
     # command line tools
     - tabix
     - samtools>=1.7
-      #- bcftools>=1.9
+    - bcftools>=1.7
     - gatk4>=4.0.4
     - star>=2.7
 

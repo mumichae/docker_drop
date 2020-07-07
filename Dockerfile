@@ -1,11 +1,11 @@
+# build it with
+# docker build . --network=host --tag mertes/drop:latest --tag mertes/drop
+
 # base image
 FROM conda/miniconda3-centos7
 
-# build it with
-# docker build . --no-cache --network=host --tag mertes/drop:latest --tag mertes/drop
-
 # update and setup system
-RUN yum update -y \
+RUN yum update -y --exclude=setup \
     && yum install -y which bc less wget vim \
     && yum clean all \
     && conda update -n base -c defaults conda
@@ -17,41 +17,28 @@ RUN conda env create -f /tmp/environment.yml \
 
 # taken from: https://pythonspeed.com/articles/activate-conda-dockerfile/
 # Make RUN commands use the new environment:
-SHELL ["conda", "run", "-n", "drop-docker", "/bin/bash", "-c"]
+SHELL ["conda", "run", "-n", "drop", "/bin/bash", "-c"]
 
 # install tMAE
-RUN R -e "BiocManager::install(\"mumichae/tMAE\", ask=FALSE, update=FALSE, dependencies=FALSE)" \
-    && R -e "BiocManager::install(\"c-mertes/FRASER\", ask=FALSE, update=FALSE, depndencies=FALSE)"
+RUN R -e "BiocManager::install(\"mumichae/tMAE\", ask=FALSE, update=FALSE, dependencies=FALSE)" 
+#    && R -e "BiocManager::install(\"c-mertes/FRASER\", ask=FALSE, update=FALSE, depndencies=FALSE)"
+#    && R -e "BiocManager::install(\"gagneurlab/OUTRIDER\", ask=FALSE, update=FALSE, depndencies=FALSE)"
 
 # tweak drop to work on root
 SHELL [ "bash", "-c" ]
-RUN sed 's/tar -zx/tar --no-same-owner -zx/' -i /usr/local/envs/drop-docker/lib/python3.7/site-packages/drop/download_data.sh \
-    && conda init bash \
-    && echo -e "\n# activate drop environemnt\nconda activate drop-docker\n" >> ~/.bashrc \
-    && echo -e "\n# read/write for group\numask 002\n" >> ~/.bashrc
-
-# install bcftools
-RUN yum install -y autoconf git vim
-SHELL ["conda", "run", "-n", "drop-docker", "/bin/bash", "-c"]
-RUN export CC=x86_64-conda_cos6-linux-gnu-gcc \
-    && git clone git://github.com/samtools/bcftools.git \
-    && git clone git://github.com/samtools/htslib.git \
-    && cd htslib \
-        && autoheader \
-        && autoconf \
-        && ./configure --prefix=/usr/local/envs/drop-docker/ \
-    && cd ../bcftools \
-        && autoheader \
-        && autoconf \
-        && ./configure --prefix=/usr/local/envs/drop-docker/ \
-        && make -j 4 \
-        && make install
-
-# problem with wbuild/drop?
-RUN sed -re 's/(self.path=os.path.abspath.self.path)/\1[0]/' -i /usr/local/envs/drop-docker/lib/python3.7/site-packages/wbuild/utils.py
+# RUN sed 's/tar -zx/tar --no-same-owner -zx/' -i /usr/local/envs/drop-docker/lib/python3.7/site-packages/drop/download_data.sh 
+COPY entry_point.sh /usr/local/bin/entry_point.sh
 
 WORKDIR /drop
-COPY entry_point.sh /usr/local/bin/entry_point.sh
+RUN useradd -ms /bin/bash drop \
+    && chown drop:drop /drop
+
+USER drop:drop
+RUN conda init bash \
+    && echo -e "\n# activate drop environemnt\nconda activate drop\n" >> ~/.bashrc \
+    && echo -e "\n# read/write for group\numask 002\n" >> ~/.bashrc
+
+
 ENTRYPOINT [ "entry_point.sh" ]
 CMD [ "bash" ]
 
