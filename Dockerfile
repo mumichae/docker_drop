@@ -3,6 +3,7 @@
 
 # base image
 FROM conda/miniconda3-centos7
+ARG DROP_VERSION=0.9.0
 
 # update and setup system
 RUN yum update -y --exclude=setup \
@@ -11,62 +12,33 @@ RUN yum update -y --exclude=setup \
     && conda update -n base -c defaults conda
 
 # init drop env
+RUN conda create -y -c conda-forge -c bioconda -n drop \
+        drop=0.9.1 \
+        r-base=4.0.2 \
+        bioconductor-mafdb.gnomad.r2.1.grch38 \ 
+        bioconductor-mafdb.gnomad.r2.1.hs37d5 
+
 COPY environment.yml /tmp/
-RUN conda env create -f /tmp/environment.yml \
+RUN conda env update -f /tmp/environment.yml \
+    && conda install -y -n drop drop=$DROP_VERSION \
     && conda clean --all -y
 
-# taken from: https://pythonspeed.com/articles/activate-conda-dockerfile/
-# Make RUN commands use the new environment:
-SHELL ["conda", "run", "-n", "drop", "/bin/bash", "-c"]
+# create user 
+RUN useradd -d /drop -ms /bin/bash drop \
+    && chmod -R ugo+rwX /drop
 
-# install tMAE
-RUN R -e "BiocManager::install(\"mumichae/tMAE\", ask=FALSE, update=FALSE, dependencies=FALSE)" 
-#    && R -e "BiocManager::install(\"c-mertes/FRASER\", ask=FALSE, update=FALSE, depndencies=FALSE)"
-#    && R -e "BiocManager::install(\"gagneurlab/OUTRIDER\", ask=FALSE, update=FALSE, depndencies=FALSE)"
-
-# tweak drop to work on root
-SHELL [ "bash", "-c" ]
-# RUN sed 's/tar -zx/tar --no-same-owner -zx/' -i /usr/local/envs/drop-docker/lib/python3.7/site-packages/drop/download_data.sh 
-COPY entry_point.sh /usr/local/bin/entry_point.sh
-
-WORKDIR /drop
-RUN useradd -ms /bin/bash drop \
-    && chown drop:drop /drop
-
+# setup bash with conda and locals (language pack)
 USER drop:drop
 RUN conda init bash \
     && echo -e "\n# activate drop environemnt\nconda activate drop\n" >> ~/.bashrc \
-    && echo -e "\n# read/write for group\numask 002\n" >> ~/.bashrc
+    && echo -e "\n# read/write for group\numask 002\n" >> ~/.bashrc \
+    && echo -e "\n# add local language support for CLICK\nexport LC_ALL=en_US.utf8\nexport LANG=en_US.utf8\n" >> ~/.bashrc \
+    && mkdir /drop/analysis \
+    && chmod -R ugo+rwX /drop
+WORKDIR /drop/analysis
 
-
+# set entry point for image
+COPY entry_point.sh /usr/local/bin/entry_point.sh
 ENTRYPOINT [ "entry_point.sh" ]
 CMD [ "bash" ]
-
-
-
-#CMD [ "conda", "run", "-n", "drop-docker" ]
-
-# init user space
-# entry point to enable conda env on the fly
-#SHELL [ "bash", "-c" ]
-#RUN groupadd -g 1000 drop \
-#    && useradd -u 1000 -g 1000 drop
-# COPY entry_point.sh /usr/local/bin/
-#COPY entry_point_plain.sh /usr/local/bin/entry_point.sh
-#RUN sed 's/^if . shopt -q.*/if [ "true" == "true" ] ; then # always on ;)/' -i /etc/bashrc
-
-#USER drop:drop
-#RUN echo "conda activate drop-docker" >> ~/.bashrc
-
-#SHELL [ "bash", "--rcfile", "/etc/bashrc_init", "-c" ]
-#ENTRYPOINT [ "entry_point.sh" ]
-#CMD [ "bash" ]
-
-#SHELL [ "bash", "-c" ]
-#ENTRYPOINT [ "bash", "--rcfile" "/etc/bashrc_init", "-c" ]
-#CMD [ "bash" ]
-#COPY conda.sh /etc/profile.d/
-#COPY conda.sh /etc/bashrc_init
-#RUN { echo -e "if [ -f /etc/bashrc ]; then \n  . /etc/bashrc\nfi"; cat /etc/bashrc_init; } >> /etc/bashrc_init_tmp && mv /etc/bashrc_init_tmp /etc/bashrc_init
-# RUN conda init
 

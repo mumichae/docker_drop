@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -Eeo pipefail
 
-# start script
-echo "my input: '$@'"
+# set home folder and source the drop's bashrc
+export HOME=/drop
+. /drop/.bashrc
+set -u
 
-# some bash args or non at all (default)
+# some bash args or none at all (default)
 if [ "$#" -eq 0 ] || [ "${1#-}" != "$1" ] ;
 then
-    echo "run as bash with just parameters ..."
+    echo -e "Welcome to the drop command line!\n"
     exec bash "$@"
+
 elif [ "${1#./}" == "bash" ]; then
-    echo "bash command is provided ..."
+    echo -e "Welcome to the drop command line!\n"
     exec "$@"
+# any other command should be treated as command to be 
+# run within the conda environment
 else
-    echo "run it using conda env ..."
-    conda run -n drop-docker "$@"
+    conda run -n drop "$@"
 fi
-
-
