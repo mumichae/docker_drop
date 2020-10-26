@@ -3,7 +3,7 @@
 
 # base image
 FROM conda/miniconda3-centos7
-ARG DROP_VERSION=0.9.0
+ARG DROP_VERSION=1.0.0
 
 # update and setup system
 RUN yum update -y --exclude=setup \
@@ -13,15 +13,11 @@ RUN yum update -y --exclude=setup \
 
 # init drop env
 RUN conda create -y -c conda-forge -c bioconda -n drop \
-        drop=0.9.1 \
+        drop=$DROP_VERSION \
         r-base=4.0.2 \
-        bioconductor-mafdb.gnomad.r2.1.grch38 \ 
-        bioconductor-mafdb.gnomad.r2.1.hs37d5 
-
-COPY environment.yml /tmp/
-RUN conda env update -f /tmp/environment.yml \
-    && conda install -y -n drop drop=$DROP_VERSION \
-    && conda clean --all -y
+        #bioconductor-mafdb.gnomad.r2.1.grch38 \ 
+        #bioconductor-mafdb.gnomad.r2.1.hs37d5
+    && conda clean --all -y 
 
 # create user 
 RUN useradd -d /drop -ms /bin/bash drop \
